@@ -192,6 +192,15 @@
     const k = Math.min(W / image.naturalWidth, H / image.naturalHeight);
     ecran.style.width = image.naturalWidth * k + 'px';
     ecran.style.height = image.naturalHeight * k + 'px';
+    // Le guide, sa fiche et sa bulle restent DANS l'écran du téléphone. Posés sur toute la
+    // largeur de la fenêtre, ils recouvraient la moitié basse de la capture dès que la fenêtre
+    // était plus large que le téléphone — on ne voyait plus le bouton à toucher.
+    // Sur un écran bas (ordinateur portable), le téléphone devient étroit : la bulle garde alors
+    // une largeur lisible, quitte à déborder un peu de chaque côté.
+    const largeur = Math.max(image.naturalWidth * k - 16, Math.min(340, W - 16));
+    const gauche = (W - largeur) / 2;
+    groupe.style.left = gauche + 'px';
+    groupe.style.right = gauche + 'px';
     placerGroupe();
   }
   addEventListener('resize', cadrer);
@@ -366,14 +375,16 @@
     d.className = 'fin';
     d.innerHTML = `<div class="carte">
       <img src="assets/guide/fete.webp" alt="">
-      <h2>Leçon terminée</h2>
-      <p>Tout ce que vous venez de faire, vous le ferez de la même façon dans Juboo.</p>
-      <a class="principal" href="index.html#telecharger">Télécharger Juboo</a>
+      <h2>Ce n'était qu'un aperçu</h2>
+      <p>Juboo fait bien plus que ça. Pour tout découvrir et vous en servir, installez
+        l'application : elle s'installe par WhatsApp.</p>
+      <a class="principal" data-whatsapp href="https://wa.me/221775543487">Recevoir Juboo sur WhatsApp</a>
       <a class="second" href="index.html#lecons">Essayer un autre espace</a>
     </div>`;
     scene.append(d);
   }
 })();
 </script>
+<script src="assets/whatsapp.js"></script>
 </body>
 </html>

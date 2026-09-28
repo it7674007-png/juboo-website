@@ -31,11 +31,10 @@
       "ecran": "e1.webp",
       "humeur": "explique",
       "dire": [
-        "Bonjour, et bienvenue sur Juboo.",
-        "Je suis le guide de l'application. Vous avez choisi de découvrir l'espace « Prêts entre proches ».",
-        "Il sert à noter l'argent que vous prêtez à vos proches, et celui qu'ils vous prêtent.",
-        "Plutôt qu'une longue explication, mettons-nous en situation.",
-        "L'écran que vous voyez est celui de l'application. Touchez simplement là où je vous l'indique."
+        "Bonjour ! Je suis le guide de Juboo.",
+        "Juboo, c'est un carnet de comptes dans votre téléphone : pour la boutique, les tontines et les prêts entre proches.",
+        "Vous avez choisi les prêts entre proches : l'argent que vous prêtez à la famille et aux amis, et celui qu'on vous prête.",
+        "Mettons-nous en situation. L'écran que vous voyez est celui de l'application : touchez là où je vous l'indique."
       ],
       "bouton": "Commencer"
     },
@@ -192,10 +191,10 @@
       "ecran": "e8.webp",
       "humeur": "explique",
       "dire": [
-        "La démonstration est terminée.",
         "D'un côté ce qu'on vous doit, de l'autre ce que vous devez : personne n'a plus besoin de s'en souvenir.",
-        "Dans l'application, je vous accompagne dans 17 autres leçons.",
-        "Et vos comptes restent sur votre téléphone, même sans internet."
+        "Ce n'était qu'un aperçu. Il reste beaucoup d'autres fonctions que nous n'avons pas vues.",
+        "Prêter en plusieurs versements, la reconnaissance de dette, le relevé complet avec un proche… et les espaces Boutique et Tontines.",
+        "Pour les découvrir et vous en servir, il faut installer Juboo."
       ],
       "bouton": "Terminer",
       "fin": true
