@@ -1,0 +1,331 @@
+/* Le simulateur de Juboo.
+ *
+ * Le téléphone est dessiné à 360 points de large — la largeur de l'application sur le Tecno —
+ * puis agrandi ou réduit d'un bloc pour remplir la scène. Toutes les mesures ci-dessous sont
+ * donc celles de l'application, relevées sur ses captures (pixels ÷ 2). */
+
+:root{
+  --orange:#F99F1B; --orange-fonce:#C97D00; --halo:#F5A623;
+  --encre:#1A1B4B; --var:#5C5347; --fond:#FBF7F2; --surface:#FFFFFF;
+  --dlg:#ECE6F0; --contour:#C9BEB0; --sec:#D8ECEF; --sv:#F1E8DF;
+  --rouge:#E53935; --vert:#2E7D32; --gris:#8E8E93; --creme:#FAF6EF;
+  --site:#FBF7F2; --trait:#E6DDD0;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{background:var(--site);color:var(--encre);overscroll-behavior:none;
+  font-family:Roboto,system-ui,-apple-system,"Segoe UI",Arial,sans-serif}
+button{font:inherit;cursor:pointer;color:inherit}
+[hidden]{display:none!important}
+
+/* ---- La barre du site, au-dessus du téléphone ---- */
+.barre-site{height:44px;display:flex;align-items:center;gap:8px;padding:0 12px;background:#fff;
+  border-bottom:1px solid var(--trait);font-size:14px;position:relative;z-index:5}
+.barre-site a{color:var(--orange-fonce);font-weight:700;text-decoration:none;padding:10px 4px}
+.barre-site .titre{flex:1;text-align:center;color:#6B6F7B;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;margin-right:64px}
+
+/* ---- La scène : plein écran sur téléphone, un téléphone posé sur la table sur ordinateur ---- */
+.scene{position:relative;height:calc(100dvh - 44px);overflow:hidden;background:var(--fond)}
+@media (min-width:700px){
+  body{background:#ECE5DA}
+  .cadre{width:400px;margin:20px auto;border-radius:34px;overflow:hidden;
+    border:10px solid #1D1D2B;box-shadow:0 24px 60px rgba(26,27,75,.25);background:var(--fond)}
+  .scene{height:min(800px, calc(100dvh - 40px - 20px - 44px))}
+}
+.erreur{padding:40px 20px;text-align:center}
+
+/* ================================================================================================
+   LE TÉLÉPHONE
+   ================================================================================================ */
+.tel{position:absolute;left:0;top:0;width:360px;transform-origin:0 0;overflow:hidden;
+  background:var(--fond);color:var(--encre);font-size:14px;line-height:20px;
+  -webkit-font-smoothing:antialiased;--leve:0px;--bas:0px}
+.tel input{font:inherit;color:inherit}
+.hote{position:absolute;inset:0}
+.ecran{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--fond)}
+.defile{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;
+  padding-bottom:calc(var(--bas) + 16px)}
+.defile::-webkit-scrollbar{width:0}
+.ico{display:inline-block;flex:none;fill:currentColor;vertical-align:middle}
+
+/* La barre de l'application : le menu, le nom, et « Recommencer » pendant une leçon. */
+.barre-app{height:64px;flex:none;background:#fff;display:flex;align-items:center;
+  justify-content:space-between;padding:0 4px;position:relative}
+.barre-app .nom{position:absolute;left:0;right:0;text-align:center;color:var(--orange);
+  font-weight:700;font-size:22px;line-height:28px;pointer-events:none}
+.bouton-icone{width:48px;height:48px;display:grid;place-items:center;border:0;background:none;
+  border-radius:50%;padding:0;position:relative;flex:none}
+.bouton-icone:active{background:rgba(26,27,75,.08)}
+.bouton-texte{border:0;background:none;color:var(--orange);font-weight:700;font-size:14px;
+  line-height:20px;padding:10px 12px;border-radius:20px;position:relative}
+.bouton-texte:active{background:rgba(249,159,27,.12)}
+.barre-app .menu{color:var(--orange)}
+
+/* Le bandeau des écrans qui n'ont pas la barre : « Leçon : … » et « Recommencer ». */
+.bandeau{height:40px;flex:none;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.12);display:flex;
+  align-items:center;padding:0 4px 0 16px;font-size:12px;line-height:16px;color:var(--var);
+  font-weight:500;position:relative;z-index:2}
+.bandeau span{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.espace-bandeau{height:40px;flex:none}
+
+/* L'en-tête d'un espace : la porte de sortie, puis le titre. */
+.entete{display:flex;align-items:center;height:64px;margin-top:40px;padding:0 4px;flex:none}
+.entete h1{margin:0 0 0 8px;font-weight:900;color:var(--encre);white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis}
+.t22{font-size:22px;line-height:28px}.t24{font-size:24px;line-height:32px}.t28{font-size:28px;line-height:36px}
+/* La barre d'un écran de détail : retour, titre, actions. */
+.barre-detail{display:flex;align-items:center;height:64px;padding:0 4px;flex:none}
+.barre-detail h1{flex:1;margin:0 0 0 8px;font-size:22px;line-height:28px;font-weight:900;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ---- Onglets ---- */
+.onglets-cahier{margin:0 16px;padding:10px 4px;border-radius:16px;background:#F6EFE8;display:flex;flex:none}
+.onglets-cahier button{flex:1;border:0;background:none;border-radius:12px;height:36px;font-size:14px;
+  font-weight:500;color:var(--var)}
+.onglets-cahier button.choisi{background:var(--orange);color:#fff;font-weight:700}
+.segments{display:flex;height:40px;border:1px solid var(--contour);border-radius:20px;
+  margin:8px 16px;flex:none;position:relative}
+.segments button{flex:1;border:0;background:#E4E1E1;font-size:14px;font-weight:700;color:var(--encre);
+  display:flex;align-items:center;justify-content:center;gap:8px}
+.segments button:first-child{border-radius:19px 0 0 19px}
+.segments button:last-child{border-radius:0 19px 19px 0}
+.segments button+button{border-left:1px solid var(--contour)}
+.segments button.choisi{background:var(--orange);color:#000}
+
+/* ---- Cartes ---- */
+.carte{background:var(--surface);border-radius:20px;box-shadow:0 1px 3px rgba(0,0,0,.12),0 1px 2px rgba(0,0,0,.06)}
+.resume{display:flex;gap:12px;padding:24px 16px 8px}
+.resume .carte{flex:1;border-radius:18px;padding:14px;display:flex;align-items:center;gap:10px;min-width:0}
+.pastille{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;flex:none}
+.resume .libelle{font-size:11px;line-height:16px;font-weight:500;color:rgba(26,27,75,.6)}
+.resume .valeur{font-size:16px;line-height:24px;font-weight:900}
+.recherche{margin:8px 16px;height:56px;border:1px solid var(--contour);border-radius:16px;display:flex;
+  align-items:center;gap:12px;padding:0 12px;flex:none;background:transparent}
+.recherche:focus-within{border:2px solid var(--orange);padding:0 11px}
+.recherche input{flex:1;border:0;outline:0;background:none;font-size:16px;min-width:0;height:100%}
+.recherche input::placeholder{color:var(--var);opacity:1}
+.liste{display:flex;flex-direction:column;gap:12px;padding:8px 16px 0}
+.client{padding:16px;cursor:pointer}
+.client .haut{display:flex;align-items:center;gap:12px}
+.initiale{width:44px;height:44px;border-radius:50%;background:#FEF3E3;color:var(--orange);font-weight:900;
+  font-size:16px;display:grid;place-items:center;flex:none}
+.client .nom{font-size:16px;line-height:24px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gris60{color:rgba(26,27,75,.6)}
+.petit{font-size:12px;line-height:16px}
+.badge{display:inline-flex;align-items:center;gap:6px;border-radius:8px;padding:4px 8px;font-size:10px;
+  line-height:14px;font-weight:700;color:var(--gris);background:rgba(142,142,147,.1);flex:none;white-space:nowrap}
+.badge::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.du{text-align:right;margin-top:12px;font-weight:900;color:var(--rouge);font-size:16px;line-height:24px}
+
+/* ---- États vides ---- */
+.vide{padding:32px 24px;display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center}
+.vide .rond{width:96px;height:96px;border-radius:50%;background:#FFE4C4;color:#4A2C00;display:grid;place-items:center}
+.vide h2{margin:0;font-size:24px;line-height:32px;font-weight:700}
+.vide p{margin:8px 0 0;font-size:14px;line-height:20px;color:var(--var)}
+.centre{flex:1;display:flex;align-items:center;justify-content:center}
+
+/* ---- Boutons ---- */
+.principal{height:56px;border:0;border-radius:16px;background:var(--orange);color:#fff;font-weight:700;font-size:16px;
+  padding:0 24px;display:inline-flex;align-items:center;justify-content:center;gap:8px;position:relative;
+  box-shadow:0 2px 4px rgba(0,0,0,.18)}
+.secondaire{height:56px;border:0;border-radius:16px;background:var(--sec);color:var(--encre);font-weight:700;
+  font-size:16px;padding:0 24px;width:100%}
+.plein{height:40px;border:0;border-radius:20px;background:var(--orange);color:#fff;font-weight:700;font-size:14px;padding:0 24px}
+.plein.carre{border-radius:12px}
+.plein.danger{background:#B3261E}
+.plein.rouge{background:var(--rouge)}
+.contour{height:40px;border:1px solid var(--contour);border-radius:20px;background:none;color:var(--orange);font-weight:700;
+  font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;width:100%}
+.principal:active,.plein:active,.secondaire:active{filter:brightness(.95)}
+
+/* ---- Boutons flottants ---- */
+.fab{position:absolute;right:16px;bottom:16px;border:0;background:var(--orange);color:#fff;display:flex;
+  align-items:center;justify-content:center;box-shadow:0 3px 6px rgba(0,0,0,.2),0 2px 4px rgba(0,0,0,.14);
+  transform:translateY(calc(-1 * var(--leve)));transition:transform .25s;z-index:3}
+.fab.etendu{height:56px;border-radius:20px;padding:0 20px 0 16px;gap:12px;font-weight:700;font-size:16px}
+.fab.rond{width:56px;height:56px;border-radius:16px}
+.fab.grand{width:96px;height:96px;border-radius:24px}
+
+/* ---- Le battement : c'est le bouton lui-même qui bat, comme dans l'application ----
+ * Boum, boum, boum — puis deux secondes de repos (tutorialTarget : 1 → 1,18 en 200 ms, retour en
+ * 220 ms, trois fois, sur 3,4 s). La propriété `scale` et non `transform` : le bouton flottant
+ * garde sa montée au-dessus du guide pendant qu'il bat. */
+.bat{animation:bat 3.4s infinite;z-index:4}
+@keyframes bat{
+  0%{scale:1;animation-timing-function:cubic-bezier(.4,0,.2,1)} 5.88%{scale:1.18} 12.35%{scale:1;animation-timing-function:cubic-bezier(.4,0,.2,1)}
+  18.24%{scale:1.18} 24.71%{scale:1;animation-timing-function:cubic-bezier(.4,0,.2,1)} 30.59%{scale:1.18}
+  37.06%{scale:1} 100%{scale:1}
+}
+@media (prefers-reduced-motion:reduce){.bat{animation:none}}
+
+/* ================================================================================================
+   LES FENÊTRES
+   ================================================================================================ */
+.voile{position:absolute;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;
+  z-index:20;animation:apparait .15s ease-out}
+@keyframes apparait{from{opacity:0}}
+.dlg{width:320px;max-height:100%;background:var(--dlg);border-radius:28px;display:flex;flex-direction:column;
+  padding:24px 0;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.dlg h2{margin:0 24px 16px;font-size:24px;line-height:32px;font-weight:700;color:var(--encre)}
+.dlg h2.noir{font-weight:900}
+.dlg .corps{flex:1 1 auto;min-height:0;overflow-y:auto;padding:0 24px;color:var(--var);font-size:14px;line-height:20px;
+  display:flex;flex-direction:column;overscroll-behavior:contain}
+.dlg .corps::-webkit-scrollbar{width:0}
+.dlg .pied{display:flex;justify-content:flex-end;align-items:center;gap:8px;padding:24px 24px 0;flex:none;flex-wrap:wrap}
+.pile{display:flex;flex-direction:column}
+.g8{gap:8px}.g12{gap:12px}.g14{gap:14px}.g16{gap:16px}
+.etiquette{font-size:12px;line-height:16px;font-weight:700;color:var(--var)}
+.etiquette.l{font-size:14px;line-height:20px}
+.aide-champ{font-size:12px;line-height:16px;color:var(--var);padding:4px 16px 0}
+.aide-champ.erreur-champ{color:#B3261E}
+.note-petite{font-size:11px;line-height:16px;font-weight:500;color:rgba(26,27,75,.6)}
+.ligne-entre{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.menu-deroulant{position:absolute;right:8px;top:92px;background:#F3EDF7;border-radius:4px;min-width:220px;padding:8px 0;
+  box-shadow:0 4px 12px rgba(0,0,0,.25);z-index:25}
+.menu-deroulant button{display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;padding:0 12px;
+  height:48px;font-size:14px;color:var(--encre);text-align:left}
+.menu-deroulant button.danger{color:#B3261E}
+.menu-deroulant button:active{background:rgba(0,0,0,.06)}
+
+/* ---- Le champ de saisie de l'application (OutlinedTextField) ----
+ * Vide et sans le doigt dessus, le libellé est DANS le champ, et il peut tenir sur deux lignes
+ * comme dans l'application (« Numéro Wave/OM du gestionnaire »). Dès qu'on y touche, ou qu'il
+ * contient quelque chose, il monte sur le trait du haut. */
+.champ{position:relative;border-radius:12px;min-height:56px;display:flex;align-items:center}
+.champ::before{content:"";position:absolute;inset:0;border:1px solid var(--contour);border-radius:inherit;pointer-events:none}
+.champ.focus::before{border:2px solid var(--orange)}
+.champ.erreur::before{border-color:#B3261E}
+.champ input{width:100%;border:0;outline:0;background:none;font-size:16px;line-height:24px;padding:16px;color:var(--encre);
+  min-width:0}
+.champ .lib{position:absolute;left:12px;right:12px;top:0;font-size:12px;line-height:16px;padding:0 4px;
+  transform:translateY(-50%);color:var(--var);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  pointer-events:none;width:max-content;max-width:calc(100% - 24px)}
+.champ .lib span{position:relative;z-index:1}
+.champ .lib::before{content:"";position:absolute;left:0;right:0;top:50%;height:3px;margin-top:-1px;background:var(--fond-champ,var(--dlg))}
+.champ.focus .lib{color:var(--orange)}
+.champ.repos .lib{position:static;transform:none;font-size:16px;line-height:24px;padding:16px;width:auto;max-width:none;
+  white-space:normal;overflow:visible}
+.champ.repos .lib::before{display:none}
+.champ.repos input{position:absolute;inset:0;opacity:0}
+.champ input::placeholder{color:var(--var);opacity:.7}
+.champ.repos input::placeholder{color:transparent}
+.champ .apres{margin-right:4px}
+.sur-blanc{--fond-champ:#fff}
+
+/* Le champ des prêts : libellé au-dessus, trait léger. */
+.champ-pret .titre-champ{font-size:14px;line-height:20px;font-weight:700;color:rgba(26,27,75,.6);margin-bottom:8px}
+.champ-pret .boite{height:56px;border:1px solid rgba(26,27,75,.12);border-radius:12px;display:flex;align-items:center}
+.champ-pret .boite:focus-within{border:2px solid var(--orange)}
+.champ-pret input{width:100%;border:0;outline:0;background:none;font-size:16px;line-height:24px;padding:0 16px;height:100%}
+.champ-pret input::placeholder{color:rgba(26,27,75,.3)}
+
+/* ---- Puces (FilterChip) : 32 de haut, dans une zone de toucher de 48 ---- */
+.puces{display:flex;flex-wrap:wrap;column-gap:8px}
+.puce{height:48px;border:0;background:none;padding:0;display:flex;align-items:center}
+.puce span{height:32px;display:flex;align-items:center;gap:8px;padding:0 16px;border:1px solid var(--contour);border-radius:8px;
+  font-size:14px;line-height:20px;font-weight:500;color:var(--var)}
+/* Sans coche : les puces de l'application n'ont pas d'icône, la couleur suffit. */
+.puce.choisie span{background:var(--sec);border-color:transparent;color:var(--encre)}
+
+/* La surface « Première collecte », « Je participe », « Qui touche la cagnotte ? » */
+.surface{background:#EEE7E9;border-radius:12px;padding:12px;display:flex;align-items:center;gap:10px;border:0;width:100%;
+  text-align:left;color:var(--var)}
+.surface.cochee{background:#EDDDD6}
+.case{width:48px;height:48px;display:grid;place-items:center;flex:none;margin:-12px -4px -12px -12px}
+.case i{width:18px;height:18px;border:2px solid var(--var);border-radius:2px;display:grid;place-items:center}
+.surface.cochee .case i{background:var(--orange);border-color:var(--orange);color:#fff}
+.modes{border:1px solid rgba(249,159,27,.25);background:#EEE7E9;border-radius:12px;overflow:hidden}
+.modes.ouvert{border-color:rgba(249,159,27,.6)}
+.modes .tete{display:flex;align-items:center;padding:12px 14px;width:100%;border:0;background:none;text-align:left;color:var(--encre)}
+.modes .tete .ico{transition:transform .2s;color:var(--orange)}
+.modes.ouvert .tete .ico{transform:rotate(180deg)}
+.modes .liste-modes{padding:0 6px 6px}
+.mode{display:block;width:100%;border:0;background:none;text-align:left;border-radius:10px;padding:4px 0;color:var(--encre)}
+.mode.choisi{background:rgba(249,159,27,.12)}
+.mode .rangee{display:flex;align-items:center;font-size:16px;line-height:24px}
+.mode.choisi .rangee{font-weight:700}
+.radio{width:48px;height:48px;display:grid;place-items:center;flex:none}
+.radio i{width:20px;height:20px;border:2px solid var(--var);border-radius:50%;display:grid;place-items:center}
+.mode.choisi .radio i{border-color:var(--orange)}
+.mode.choisi .radio i::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--orange)}
+.mode p{margin:0;padding:0 12px 8px 48px;font-size:12px;line-height:16px;color:rgba(26,27,75,.75)}
+
+/* ---- Toast (le petit message noir d'Android) ---- */
+.toast{position:absolute;left:50%;bottom:72px;transform:translateX(-50%);background:rgba(50,50,50,.92);color:#fff;
+  font-size:14px;line-height:20px;padding:10px 16px;border-radius:22px;max-width:300px;width:max-content;text-align:center;
+  z-index:60;animation:apparait .2s ease-out;pointer-events:none}
+
+/* ---- La notification d'un paiement, qui glisse du haut ---- */
+.notif{position:absolute;left:12px;right:12px;top:8px;z-index:55;background:#fff;border-radius:16px;
+  box-shadow:0 10px 30px rgba(26,27,75,.28);padding:10px 12px;display:flex;gap:10px;align-items:center;
+  animation:glisse .45s ease-out}
+.notif .logo{width:34px;height:34px;flex:none;border-radius:50%;background:#1DC3FF;color:#fff;
+  display:grid;place-items:center;font-weight:800;font-size:15px}
+.notif .source{font-size:11px;line-height:14px;color:#6B6F7B}
+.notif b{display:block;font-size:14px;line-height:18px;color:#20203A}
+.notif .detail{font-size:12px;line-height:16px;color:#6B6F7B}
+@keyframes glisse{from{transform:translateY(-130%);opacity:0}to{transform:none;opacity:1}}
+
+/* ================================================================================================
+   LE GUIDE
+   ================================================================================================ */
+.guide{position:absolute;left:16px;right:16px;bottom:84px;z-index:30;display:flex;flex-direction:column;gap:8px;
+  pointer-events:none}
+.guide > *{pointer-events:auto}
+.guide .ligne{display:flex;align-items:flex-end;gap:8px}
+.rond-guide{width:72px;height:72px;flex:none;border-radius:50%;background:var(--creme);border:0;padding:0;
+  box-shadow:0 4px 12px rgba(26,27,75,.22);overflow:hidden}
+.rond-guide img{width:100%;height:100%;object-fit:contain;padding:2px;display:block}
+.bulle{flex:1;min-width:0;background:var(--creme);color:var(--encre);border-radius:18px 18px 18px 4px;
+  box-shadow:0 8px 24px rgba(26,27,75,.2);padding:16px;display:flex;flex-direction:column;gap:8px;
+  animation:apparait .18s ease-out}
+.bulle .etape{font-size:11px;line-height:16px;font-weight:700;color:rgba(26,27,75,.5)}
+.bulle .solution{font-size:11px;line-height:16px;font-weight:700;color:var(--orange)}
+.bulle .texte{font-size:14px;line-height:20px;cursor:default}
+.bulle .texte.suite{cursor:pointer}
+.bulle .actions{display:flex;align-items:center}
+.bulle .indice{border:0;background:none;font-size:12px;line-height:16px;font-weight:500;color:rgba(26,27,75,.7);
+  padding:6px 8px;border-radius:8px;margin-left:-8px}
+.bulle .indice:active{background:rgba(26,27,75,.08)}
+.bulle .vide-flex{flex:1}
+.bulle .avance{background:var(--orange);color:var(--encre);border:0;border-radius:10px;padding:8px 16px;font-weight:700;
+  font-size:14px;line-height:20px;white-space:nowrap}
+.bulle .avance:active{transform:scale(.97)}
+
+/* La fiche de la situation : ce que le guide a raconté, gardé sous les yeux. */
+.fiche{background:var(--creme);border-radius:12px;border-left:4px solid var(--orange);box-shadow:0 6px 18px rgba(26,27,75,.16);
+  padding:8px 12px;font-size:13px;line-height:18px;color:var(--encre)}
+.fiche .tete{display:flex;justify-content:space-between;align-items:center;color:var(--orange-fonce);font-weight:700;font-size:11px;
+  letter-spacing:.06em;text-transform:uppercase;background:none;border:0;width:100%;padding:2px 0;text-align:left}
+.fiche dl{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;margin:6px 0 0}
+.fiche dt{color:#6B6F7B} .fiche dd{margin:0;text-align:right;font-weight:700}
+.fiche .note{margin-top:6px;font-size:12px;color:#6B6F7B}
+.fiche.pliee dl,.fiche.pliee .note{display:none}
+
+/* Le guide DANS un formulaire.
+ * Le personnage est calé en haut, hors de ce qui défile : il reste sous les yeux pendant qu'on
+ * remplit. La fiche, elle, est la première chose du contenu : on monte la relire, on redescend. */
+.bande-hote{flex:none;padding:0 12px 8px}
+.bande-hote:empty{display:none}
+.ecran-bande{padding:0 8px 4px}
+.fiche-hote{margin-bottom:12px}
+.fiche-hote:empty{display:none}
+.bande{display:flex;align-items:center;gap:8px;background:var(--creme);border-radius:16px;padding:8px 12px;
+  box-shadow:0 4px 10px rgba(26,27,75,.18);color:var(--encre);font-size:12px;line-height:16px;border:0;width:100%;text-align:left}
+.bande img{width:40px;height:40px;border-radius:50%;flex:none;background:#fff}
+.bande span{flex:1;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.bande b{color:var(--orange);font-size:16px}
+
+/* ---- La carte de fin ---- */
+.fin{position:absolute;inset:0;z-index:70;background:rgba(26,27,75,.55);display:flex;align-items:center;justify-content:center;padding:20px}
+.fin .carte-fin{background:#fff;border-radius:20px;padding:24px 20px;text-align:center;max-width:320px;color:var(--encre)}
+.fin img{width:110px}
+.fin h2{margin:8px 0 6px;font-size:22px;line-height:28px}
+.fin p{margin:0 0 18px;color:#6B6F7B;line-height:1.45}
+.fin a{display:block;padding:13px;border-radius:12px;font-weight:700;text-decoration:none;margin-top:10px;font-size:15px}
+.fin .principal-fin{background:var(--orange);color:var(--encre)}
+.fin .second{border:2px solid var(--orange);color:var(--orange-fonce)}
+
+/* Le sélecteur de date du navigateur, posé invisible sur le bouton qui l'ouvre. */
+.date-cachee{position:absolute;inset:0;opacity:0;width:100%;height:100%;border:0;padding:0;margin:0;cursor:pointer}
