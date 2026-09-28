@@ -1,0 +1,204 @@
+{
+  "id": "pret_deux_sens",
+  "titre": "Prêter ou emprunter",
+  "espace": "Prêts entre proches",
+  "maquette": true,
+  "dossier": "captures/pret_deux_sens/",
+  "fiches": {
+    "malick": {
+      "titre": "Ce que Malick demande",
+      "lignes": [
+        ["Personne", "Malick Diagne"],
+        ["Téléphone", "77 666 55 44"],
+        ["Montant", "20 000 F"],
+        ["Motif", "Un imprévu"],
+        ["Il remboursera", "À la fin du mois"]
+      ]
+    },
+    "serigne": {
+      "titre": "Ce que Serigne vous prête",
+      "lignes": [
+        ["Personne", "Serigne Mbaye"],
+        ["Téléphone", "77 888 77 66"],
+        ["Montant", "5 000 F"],
+        ["Motif", "Pour la boutique"]
+      ],
+      "note": "Cette fois, c'est vous qui devez."
+    }
+  },
+  "pas": [
+    {
+      "ecran": "e1.webp",
+      "humeur": "explique",
+      "dire": [
+        "Bonjour, et bienvenue sur Juboo.",
+        "Je suis le guide de l'application. Vous avez choisi de découvrir l'espace « Prêts entre proches ».",
+        "Il sert à noter l'argent que vous prêtez à vos proches, et celui qu'ils vous prêtent.",
+        "Plutôt qu'une longue explication, mettons-nous en situation.",
+        "L'écran que vous voyez est celui de l'application. Touchez simplement là où je vous l'indique."
+      ],
+      "bouton": "Commencer"
+    },
+    {
+      "ecran": "e1.webp",
+      "etape": "Étape 1 sur 2",
+      "fiche": "malick",
+      "humeur": "explique",
+      "dire": [
+        "Votre cousin Malick passe vous voir.",
+        "Il a besoin de 20 000 F pour un imprévu, et promet de vous rembourser à la fin du mois.",
+        "C'est vous qui prêtez. Touchez « Noter un prêt »."
+      ],
+      "action": { "type": "toucher", "zone": { "x": 0.25, "y": 0.615, "l": 0.46, "h": 0.07 } }
+    },
+    {
+      "ecran": "e2.webp",
+      "etape": "Étape 1 sur 2",
+      "fiche": "malick",
+      "humeur": "attend",
+      "dire": [
+        "Voici le formulaire du prêt. Les renseignements de Malick restent sur la fiche.",
+        "Touchez le premier champ, et écrivez son nom."
+      ],
+      "action": {
+        "type": "saisir", "zone": { "x": 0.10, "y": 0.338, "l": 0.66, "h": 0.068 },
+        "libelle": "Qui vous doit de l'argent ?", "clavier": "texte",
+        "attendu": "Malick Diagne", "accepte": "malick"
+      }
+    },
+    {
+      "ecran": "e2.webp",
+      "etape": "Étape 1 sur 2",
+      "fiche": "malick",
+      "humeur": "attend",
+      "dire": ["Son numéro de téléphone, maintenant."],
+      "action": {
+        "type": "saisir", "zone": { "x": 0.10, "y": 0.457, "l": 0.79, "h": 0.07 },
+        "libelle": "Numéro de téléphone", "clavier": "telephone",
+        "attendu": "77 666 55 44", "chiffres": "776665544"
+      }
+    },
+    {
+      "ecran": "e2.webp",
+      "etape": "Étape 1 sur 2",
+      "fiche": "malick",
+      "humeur": "attend",
+      "dire": ["Enfin, la somme prêtée."],
+      "action": {
+        "type": "saisir", "zone": { "x": 0.10, "y": 0.578, "l": 0.79, "h": 0.068 },
+        "libelle": "Montant (FCFA)", "clavier": "chiffres",
+        "attendu": "20000", "chiffres": "20000", "rappel": "Le guide attend 20 000."
+      }
+    },
+    {
+      "ecran": "e3.webp",
+      "etape": "Étape 1 sur 2",
+      "humeur": "attend",
+      "dire": [
+        "Le motif et la date de remboursement sont remplis.",
+        "Touchez « Ajouter » pour enregistrer le prêt."
+      ],
+      "action": { "type": "toucher", "zone": { "x": 0.10, "y": 0.865, "l": 0.79, "h": 0.072 } }
+    },
+    {
+      "ecran": "e4.webp",
+      "etape": "Étape 1 sur 2",
+      "humeur": "bravo",
+      "dire": [
+        "Voilà. Malick vous doit 20 000 F, avec une date de remboursement.",
+        "Si la date passe sans remboursement, Juboo vous le rappellera."
+      ]
+    },
+    {
+      "ecran": "e4.webp",
+      "etape": "Étape 2 sur 2",
+      "fiche": "serigne",
+      "humeur": "explique",
+      "dire": [
+        "Le même jour, en fin d'après-midi.",
+        "Votre voisin Serigne vous prête 5 000 F pour la boutique.",
+        "Cette fois, c'est vous qui devez.",
+        "Dans Juboo, les deux côtés ne se mélangent jamais. Touchez l'onglet « Je dois »."
+      ],
+      "action": { "type": "toucher", "zone": { "x": 0.03, "y": 0.268, "l": 0.47, "h": 0.05 } }
+    },
+    {
+      "ecran": "e5.webp",
+      "etape": "Étape 2 sur 2",
+      "fiche": "serigne",
+      "humeur": "attend",
+      "dire": [
+        "Voici ce que vous devez. Pour l'instant, rien.",
+        "Touchez « Noter un emprunt »."
+      ],
+      "action": { "type": "toucher", "zone": { "x": 0.22, "y": 0.658, "l": 0.56, "h": 0.074 } }
+    },
+    {
+      "ecran": "e6.webp",
+      "etape": "Étape 2 sur 2",
+      "fiche": "serigne",
+      "humeur": "attend",
+      "dire": [
+        "Le même formulaire, mais du côté de ce que vous devez.",
+        "Écrivez le nom de Serigne."
+      ],
+      "action": {
+        "type": "saisir", "zone": { "x": 0.10, "y": 0.338, "l": 0.66, "h": 0.068 },
+        "libelle": "À qui devez-vous de l'argent ?", "clavier": "texte",
+        "attendu": "Serigne Mbaye", "accepte": "serigne"
+      }
+    },
+    {
+      "ecran": "e6.webp",
+      "etape": "Étape 2 sur 2",
+      "fiche": "serigne",
+      "humeur": "attend",
+      "dire": ["Son numéro de téléphone."],
+      "action": {
+        "type": "saisir", "zone": { "x": 0.10, "y": 0.457, "l": 0.79, "h": 0.07 },
+        "libelle": "Numéro de téléphone", "clavier": "telephone",
+        "attendu": "77 888 77 66", "chiffres": "778887766"
+      }
+    },
+    {
+      "ecran": "e6.webp",
+      "etape": "Étape 2 sur 2",
+      "fiche": "serigne",
+      "humeur": "attend",
+      "dire": ["Et la somme empruntée."],
+      "action": {
+        "type": "saisir", "zone": { "x": 0.10, "y": 0.578, "l": 0.79, "h": 0.068 },
+        "libelle": "Montant (FCFA)", "clavier": "chiffres",
+        "attendu": "5000", "chiffres": "5000", "rappel": "Le guide attend 5 000."
+      }
+    },
+    {
+      "ecran": "e7.webp",
+      "etape": "Étape 2 sur 2",
+      "humeur": "attend",
+      "dire": ["Tout est rempli. Touchez « Ajouter »."],
+      "action": { "type": "toucher", "zone": { "x": 0.10, "y": 0.852, "l": 0.79, "h": 0.074 } }
+    },
+    {
+      "ecran": "e8.webp",
+      "etape": "Étape 2 sur 2",
+      "humeur": "fete",
+      "dire": [
+        "Parfait. On vous doit 20 000 F, et vous devez 5 000 F.",
+        "Votre solde est de 15 000 F, et il est juste."
+      ]
+    },
+    {
+      "ecran": "e8.webp",
+      "humeur": "explique",
+      "dire": [
+        "La démonstration est terminée.",
+        "D'un côté ce qu'on vous doit, de l'autre ce que vous devez : personne n'a plus besoin de s'en souvenir.",
+        "Dans l'application, je vous accompagne dans 17 autres leçons.",
+        "Et vos comptes restent sur votre téléphone, même sans internet."
+      ],
+      "bouton": "Terminer",
+      "fin": true
+    }
+  ]
+}
