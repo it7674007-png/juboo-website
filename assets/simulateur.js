@@ -116,8 +116,44 @@
     return s;
   }
 
-  /** Ce que dit un bouton que la leçon ne simule pas. */
-  const PAS_ICI = 'Disponible dans l\'application.';
+  /**
+   * Ce que dit un bouton que la leçon ne simule pas.
+   *
+   * Le visiteur ne connaît pas Juboo : un bouton qui ne répond pas, il croit l'avoir cassé. On lui
+   * dit donc à quoi ce bouton sert dans l'application, puis pourquoi il ne fait rien ici — il
+   * n'est pas au programme de cette leçon. Demandé par le vendeur (29/09/2026).
+   */
+  const HORS_LECON = {
+    menu: 'Ce menu mène aux autres parties de Juboo : le bilan du mois, la caisse du soir, les réglages…',
+    fournisseurs: 'Cet onglet tient ce que VOUS devez à vos fournisseurs : les livraisons prises à crédit.',
+    contacts: 'Ce bouton reprend le nom et le numéro dans les contacts du téléphone. Ici, écrivez-les à la main.',
+    partageClient: 'Ce bouton envoie au client, sur WhatsApp, une image de son compte : ce qu\'il a pris, ce qu\'il a payé.',
+    releveClient: 'Ce bouton prépare le relevé du mois de ce client, à lui envoyer.',
+    credit: 'Ce bouton note un nouvel achat à crédit pour ce client, sans le recréer.',
+    tourneDeja: 'C\'est par ici qu\'on reprend une tontine commencée avant Juboo : le tour en cours, et qui a déjà reçu la cagnotte.',
+    historiqueTontine: 'Ce bouton montre l\'historique de la tontine : chaque tour, qui a payé, qui a reçu la cagnotte.',
+    ordre: 'Ce bouton montre l\'ordre de passage : qui reçoit la cagnotte, tour après tour.',
+    partageOrdre: 'Ce bouton envoie l\'ordre de passage au groupe, sur WhatsApp.',
+    rappel: 'Ce bouton prépare un rappel de collecte à envoyer aux membres, sur WhatsApp.',
+    membre: 'Ce bouton ajoute les membres de la tontine, un par un, avec leur numéro.',
+    ligneMembre: 'Chaque membre a ses boutons : noter sa cotisation, le relancer, lui donner une main de plus.',
+    releveProche: 'Ce bouton montre tout ce que vous vous êtes prêté avec cette personne, dans les deux sens.',
+    partagePret: 'Ce bouton envoie la fiche du prêt sur WhatsApp.',
+    reglementPret: 'Ce bouton note un remboursement, même partiel.',
+    reconnaissance: 'Ce bouton prépare une reconnaissance de dette, à signer par les deux personnes.'
+  };
+  /** Le message lui-même : ce que fait le bouton dans Juboo, puis pourquoi il ne fait rien ici. */
+  function horsLecon(cle) {
+    clearTimeout(UI.tempsToast);
+    const texte = HORS_LECON[cle] || '';
+    const carte = h('div', { class: 'hors-lecon', role: 'status', onclick: () => UI.toast.replaceChildren() },
+      h('img', { src: 'assets/guide/attend.webp', alt: '' }),
+      h('div', null,
+        h('div', null, 'Dans l\'application, ' + texte.charAt(0).toLowerCase() + texte.slice(1)),
+        h('b', null, 'Ce n\'est pas au programme de cette leçon.')));
+    UI.toast.replaceChildren(carte);
+    UI.tempsToast = setTimeout(() => UI.toast.replaceChildren(), Math.max(4500, texte.length * 60));
+  }
   /** Le numéro du profil, dans le carnet d'exercice : « Je participe » en a besoin. */
   const MON_NUMERO = '770000001';
 
@@ -279,7 +315,21 @@
   }
   function retour() { if (pile.length > 1) { quitterEcran(); afficher(); } }
   function allerDepart() { pile = [{ nom: L.depart }]; afficher(); }
-  function sortir() { location.href = 'index.html#lecons'; }
+  /**
+   * La porte de sortie. Dans l'application, elle quitte l'exercice d'un coup ; ici, un visiteur
+   * qui la touche par curiosité perdrait sa partie sans comprendre : on lui demande d'abord.
+   */
+  function sortir() {
+    const f = fenetre({
+      titre: 'Quitter la leçon ?',
+      corps: h('p', { style: 'margin:0' }, 'Cette porte fait sortir de l\'exercice. Vous reviendrez à la liste des leçons, et celle-ci recommencera depuis le début.'),
+      pied: [
+        h('button', { class: 'bouton-texte', onclick: () => f.fermer() }, 'Rester'),
+        h('button', { class: 'plein', onclick: () => { location.href = 'index.html#lecons'; } }, 'Quitter')
+      ]
+    });
+    ouvrir(f);
+  }
 
   /**
    * Une fenêtre. Formulaire, elle accueille le guide comme dans l'application : le personnage calé
@@ -330,7 +380,7 @@
   // ============================================================================================
   function barreApp() {
     return h('div', { class: 'barre-app' },
-      h('button', { class: 'bouton-icone menu', 'aria-label': 'Menu', onclick: () => toast(PAS_ICI) }, ic('menu')),
+      h('button', { class: 'bouton-icone menu', 'aria-label': 'Menu', onclick: () => horsLecon('menu') }, ic('menu')),
       h('div', { class: 'nom' }, 'Juboo'),
       enPartie() ? h('button', { class: 'bouton-texte', onclick: recommencer }, 'Recommencer') : h('span'));
   }
@@ -483,7 +533,7 @@
             h('div', { style: 'flex:1;min-width:0' },
               h('div', { class: 'nom' }, c.name),
               h('div', { class: 'petit gris60' }, c.knownAs || (c.phone ? telAffiche(c.phone) : 'Pas de numéro'))),
-            h('span', { class: 'badge' }, 'Pas encore d\'historique')),
+            h('button', { class: 'badge', onclick: ev => { ev.stopPropagation(); fiabilite(); } }, 'Pas encore d\'historique')),
           du > 0 ? h('div', { class: 'du' }, francs(du)) : null);
       })));
     }
@@ -493,7 +543,7 @@
       barreApp(), enTete('Cahier Digital', 't24'),
       h('div', { class: 'onglets-cahier' },
         h('button', { class: 'choisi' }, 'Mes Clients'),
-        h('button', { onclick: () => toast(PAS_ICI) }, 'Mes Fournisseurs')),
+        h('button', { onclick: () => horsLecon('fournisseurs') }, 'Mes Fournisseurs')),
       h('div', { class: 'resume' },
         carteResume('hausse', '#2E7D32', 'rgba(46,125,50,.14)', 'Total Encaissé', francs(encaisse)),
         carteResume('horloge', '#F99F1B', 'rgba(249,159,27,.14)', 'En attente', francs(attente))),
@@ -551,7 +601,7 @@
           h('div', { class: 'etiquette' }, 'Identité du client'),
           h('div', { style: 'display:flex;align-items:center' },
             h('div', { style: 'flex:1;min-width:0' }, nom.racine),
-            h('button', { class: 'bouton-icone', 'aria-label': 'Contacts', style: 'color:var(--orange)', onclick: () => toast(PAS_ICI) }, ic('contact'))),
+            h('button', { class: 'bouton-icone', 'aria-label': 'Contacts', style: 'color:var(--orange)', onclick: () => horsLecon('contacts') }, ic('contact'))),
           tel.racine, sansNumero, repere.racine),
         h('div', { class: 'pile g8' }, h('div', { class: 'etiquette' }, 'Catégorie'), tag.racine),
         h('div', { class: 'pile g8' }, h('div', { class: 'etiquette' }, 'Détails de la dette'),
@@ -621,8 +671,8 @@
       h('div', { class: 'barre-detail' },
         h('button', { class: 'bouton-icone', 'aria-label': 'Retour', onclick: retour }, ic('retour')),
         h('h1', { style: 'font-weight:400' }, 'Profil Client'),
-        h('button', { class: 'bouton-icone', 'aria-label': 'Partager la fiche du client', onclick: () => toast(PAS_ICI) }, ic('partage')),
-        h('button', { class: 'bouton-icone', 'aria-label': 'Relevé du mois', onclick: () => toast(PAS_ICI) }, ic('calendrier')),
+        h('button', { class: 'bouton-icone', 'aria-label': 'Partager la fiche du client', onclick: () => horsLecon('partageClient') }, ic('partage')),
+        h('button', { class: 'bouton-icone', 'aria-label': 'Relevé du mois', onclick: () => horsLecon('releveClient') }, ic('calendrier')),
         h('button', { class: 'bouton-icone', 'aria-label': 'Supprimer le client', style: 'color:#B3261E', onclick: () => supprimerClient(c) }, ic('corbeille'))),
       h('div', { class: 'defile', style: 'padding:16px 16px calc(var(--bas) + 16px)' },
         h('div', { class: 'pile g16' },
@@ -630,10 +680,10 @@
             h('div', { style: 'font-size:28px;line-height:36px;font-weight:900' }, c.name),
             c.knownAs ? h('div', { style: 'font-size:16px;color:#888' }, c.knownAs) : null,
             h('div', { style: 'font-size:16px;line-height:24px;color:#888' }, c.phone ? telAffiche(c.phone) : 'Pas de numéro — relance impossible'),
-            h('div', { style: 'margin-top:12px' }, h('span', { class: 'badge' }, 'Pas encore d\'historique')),
-            h('div', { style: 'margin-top:8px;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--contour);border-radius:8px;height:32px;padding:0 16px 0 8px;font-size:14px;font-weight:500' },
+            h('div', { style: 'margin-top:12px' }, h('button', { class: 'badge', onclick: fiabilite }, 'Pas encore d\'historique')),
+            h('button', { onclick: () => etiquette(c), style: 'background:none;color:var(--encre);margin-top:8px;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--contour);border-radius:8px;height:32px;padding:0 16px 0 8px;font-size:14px;font-weight:500' },
               ic('categorie', 18, 'color:var(--orange)'), c.tag)),
-          h('button', { class: 'principal', style: 'width:100%', onclick: () => toast(PAS_ICI) }, ic('paiement'), 'Accorder un crédit'),
+          h('button', { class: 'principal', style: 'width:100%', onclick: () => horsLecon('credit') }, ic('paiement'), 'Accorder un crédit'),
           h('div', { style: 'font-size:16px;line-height:24px;font-weight:700' }, 'Historique des transactions'),
           txs.length ? h('div', { class: 'pile g12' }, txs.map(t => ligneCreance(t, c)))
             : h('div', { style: 'color:var(--var)' }, 'Aucune opération pour ce client.'),
@@ -735,6 +785,28 @@
     ouvrir(f);
   }
 
+  /** La pastille de fiabilité, touchée : ce que Juboo sait de la façon dont ce client paie. */
+  function fiabilite() {
+    const f = fenetre({
+      titre: 'Pas encore d\'historique',
+      corps: h('p', { style: 'margin:0' }, 'Pas encore d\'historique avec cette personne. Juboo jugera sa fiabilité à la façon dont elle paie : à temps, en retard, ou pas du tout.'),
+      pied: [h('button', { class: 'bouton-texte', onclick: () => f.fermer() }, 'OK')]
+    });
+    ouvrir(f);
+  }
+
+  /** « Client », « Voisin », « Famille »… : l'étiquette se change depuis la fiche. */
+  function etiquette(c) {
+    const f = fenetre({
+      titre: 'Étiquette Relationnelle',
+      corps: h('div', { class: 'pile' }, ETIQUETTES.map(t => h('button', {
+        class: 'mode' + (t === c.tag ? ' choisi' : ''), style: 'padding:4px 0',
+        onclick: () => { f.fermer(); changer(() => { c.tag = t; }); }
+      }, h('div', { class: 'rangee' }, h('span', { class: 'radio' }, h('i')), t))))
+    });
+    ouvrir(f);
+  }
+
   function supprimerClient(c) {
     const f = fenetre({
       titre: 'Supprimer le client ?',
@@ -798,7 +870,7 @@
         h('div', null, 'Est-ce que des tours ont déjà eu lieu dans cette tontine ?'),
         h('button', { class: 'principal', style: 'width:100%', onclick: () => { f.fermer(); nouvelleTontine(); } }, 'Non, elle commence'),
         h('div', { style: 'font-size:12px;line-height:16px;color:rgba(26,27,75,.6)' }, 'Vous choisirez la date de la première collecte, même si c\'est dans plusieurs jours.'),
-        h('button', { class: 'secondaire', onclick: () => toast(PAS_ICI) }, 'Oui, elle tourne déjà'),
+        h('button', { class: 'secondaire', onclick: () => horsLecon('tourneDeja') }, 'Oui, elle tourne déjà'),
         h('div', { style: 'font-size:12px;line-height:16px;color:rgba(26,27,75,.6)' }, 'Vous saisirez le tour en cours et qui a déjà reçu la cagnotte.')),
       pied: [h('button', { class: 'bouton-texte', onclick: () => f.fermer() }, 'Annuler')]
     });
@@ -917,14 +989,14 @@
         h('div', { style: 'position:absolute;inset:0;z-index:24', onclick: () => { menu.hidden = true; } }),
         h('div', { class: 'menu-deroulant', role: 'menu' },
           item('actualiser', 'Actualiser', () => toast('Actualisation...')),
-          item('document', 'Historique de la tontine', () => toast(PAS_ICI)),
-          t.selectionMode === 'ORDERED' ? item('ordre', 'Ordre de passage', () => toast(PAS_ICI)) : null,
-          t.selectionMode === 'ORDERED' ? item('partage', 'Partager l\'ordre de passage', () => toast(PAS_ICI)) : null,
+          item('document', 'Historique de la tontine', () => horsLecon('historiqueTontine')),
+          t.selectionMode === 'ORDERED' ? item('ordre', 'Ordre de passage', () => horsLecon('ordre')) : null,
+          t.selectionMode === 'ORDERED' ? item('partage', 'Partager l\'ordre de passage', () => horsLecon('partageOrdre')) : null,
           item('crayon', 'Modifier la tontine', () => modifierTontine(t)),
           item('corbeille', 'Dissoudre la tontine', () => dissoudre(t), true)));
       menu.hidden = false;
     }
-    const bouton = (icone, lib) => h('button', { class: 'contour', style: 'height:40px', onclick: () => toast(PAS_ICI) }, ic(icone, 18), lib);
+    const bouton = (icone, lib, cle) => h('button', { class: 'contour', style: 'height:40px', onclick: () => horsLecon(cle) }, ic(icone, 18), lib);
     return h('div', { class: 'ecran' },
       bandeau(),
       barreDetail(t.name, retour, h('button', { class: 'bouton-icone', 'aria-label': 'Actions', onclick: ouvrirMenu }, ic('points'))),
@@ -946,15 +1018,15 @@
           h('div', { class: 'carte', style: 'padding:20px;display:flex;flex-direction:column;gap:12px' },
             h('div', { style: 'font-size:16px;font-weight:900' }, 'Gestion du Tour'),
             h('div', { style: 'font-size:14px;font-weight:700;color:var(--var)' }, 'Collecte prévue le ' + dateLongue(t.startDate)),
-            membres.length ? bouton('porteVoix', 'Rappeler la collecte') : null,
-            t.selectionMode === 'ORDERED' ? bouton('ordre', 'Ordre de passage') : null),
+            membres.length ? bouton('porteVoix', 'Rappeler la collecte', 'rappel') : null,
+            t.selectionMode === 'ORDERED' ? bouton('ordre', 'Ordre de passage', 'ordre') : null),
           h('div', { style: 'display:flex;align-items:center;justify-content:space-between' },
             h('div', { style: 'font-size:16px;font-weight:900' }, 'Membres (' + membres.length + ')')),
-          membres.length ? membres.map(m => h('div', { class: 'carte', style: 'padding:14px;display:flex;align-items:center;gap:12px;border-radius:16px' },
+          membres.length ? membres.map(m => h('div', { class: 'carte', role: 'button', onclick: () => horsLecon('ligneMembre'), style: 'padding:14px;display:flex;align-items:center;gap:12px;border-radius:16px;cursor:pointer' },
             h('div', { class: 'initiale' }, m.name.charAt(0).toUpperCase()),
             h('div', { style: 'flex:1' }, h('div', { style: 'font-weight:700' }, m.name), h('div', { class: 'petit gris60' }, '1 main · pas encore payé'))))
             : etatVide({ icone: 'groupe', titre: 'Aucun membre pour l\'instant', message: 'Ajoutez les personnes qui cotisent à cette tontine. Un nom et un numéro suffisent.' }))),
-      h('button', { class: 'fab rond', 'aria-label': 'Ajouter un membre', onclick: () => toast(PAS_ICI) }, ic('ajoutPersonne')));
+      h('button', { class: 'fab rond', 'aria-label': 'Ajouter un membre', onclick: () => horsLecon('membre') }, ic('ajoutPersonne')));
   }
 
   /** « Modifier la Tontine » : la cotisation se corrige ici ; le nombre de mains, jamais. */
@@ -1144,7 +1216,7 @@
           h('div', { class: 'carte', style: 'border-radius:24px;padding:24px;display:flex;flex-direction:column;gap:16px' },
             h('div', { style: 'display:flex;align-items:flex-end' },
               h('div', { style: 'flex:1;min-width:0' }, nom.racine),
-              h('button', { class: 'bouton-icone', 'aria-label': 'Sélectionner un contact', style: 'color:var(--orange);margin-bottom:4px', onclick: () => toast(PAS_ICI) }, ic('contact'))),
+              h('button', { class: 'bouton-icone', 'aria-label': 'Sélectionner un contact', style: 'color:var(--orange);margin-bottom:4px', onclick: () => horsLecon('contacts') }, ic('contact'))),
             tel.racine, montant.racine, note.racine,
             h('div', { class: 'pile g8' }, h('div', { style: 'font-size:14px;line-height:20px;font-weight:700;color:rgba(26,27,75,.6)' }, 'Remboursement'), rembourse.racine),
             h('div', null, titreDate, boutonDate),
@@ -1166,8 +1238,8 @@
     return h('div', { class: 'ecran' },
       bandeau(),
       barreDetail(premier.counterpartyName, retour,
-        h('button', { class: 'bouton-icone', 'aria-label': 'Relevé complet avec cette personne', onclick: () => toast(PAS_ICI) }, ic('personnes')),
-        h('button', { class: 'bouton-icone', 'aria-label': 'Partager la fiche du prêt', onclick: () => toast(PAS_ICI) }, ic('partage'))),
+        h('button', { class: 'bouton-icone', 'aria-label': 'Relevé complet avec cette personne', onclick: () => horsLecon('releveProche') }, ic('personnes')),
+        h('button', { class: 'bouton-icone', 'aria-label': 'Partager la fiche du prêt', onclick: () => horsLecon('partagePret') }, ic('partage'))),
       h('div', { class: 'defile', style: 'padding:16px 16px calc(var(--bas) + 16px)' },
         h('div', { class: 'pile', style: 'gap:24px' },
           h('div', { class: 'carte', style: 'border-radius:24px;padding:24px;text-align:center' },
@@ -1179,7 +1251,7 @@
           h('div', { class: 'pile g12' }, prets.map(l => h('div', { style: 'background:rgba(241,232,223,.3);border-radius:16px;padding:16px;display:flex;align-items:center;gap:8px;cursor:pointer', onclick: () => detailPret(l) },
             h('div', { style: 'flex:1;font-size:12px;font-weight:500' }, dateMoyenne(l.startDate)),
             h('b', null, francs(l.amount)),
-            h('button', { class: 'bouton-icone', 'aria-label': 'Enregistrer un règlement', style: 'color:var(--vert)', onclick: ev => { ev.stopPropagation(); toast(PAS_ICI); } }, ic('valide')),
+            h('button', { class: 'bouton-icone', 'aria-label': 'Enregistrer un règlement', style: 'color:var(--vert)', onclick: ev => { ev.stopPropagation(); horsLecon('reglementPret'); } }, ic('valide')),
             h('button', { class: 'bouton-icone', 'aria-label': 'Effacer cette ligne', style: 'color:#B3261E', onclick: ev => { ev.stopPropagation(); effacerPret(l); } }, ic('corbeille'))))))));
   }
   function detailPret(l) {
@@ -1191,7 +1263,7 @@
         l.description ? h('div', { style: 'background:#F1F8E9;border-radius:12px;padding:16px' },
           h('div', { style: 'font-size:11px;font-weight:700;color:var(--vert)' }, 'Note / Objet :'), h('div', { style: 'margin-top:4px' }, l.description)) : null),
       pied: [
-        h('button', { class: 'bouton-texte', onclick: () => toast(PAS_ICI) }, 'Reconnaissance de dette'),
+        h('button', { class: 'bouton-texte', onclick: () => horsLecon('reconnaissance') }, 'Reconnaissance de dette'),
         h('button', { class: 'plein', onclick: () => f.fermer() }, 'Fermer')
       ]
     });
