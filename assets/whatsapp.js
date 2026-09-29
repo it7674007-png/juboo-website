@@ -36,8 +36,8 @@
         <h2 id="wa-titre">Avant de continuer</h2>
         <p>Juboo en est à sa <b>première version</b>. Il reste sans doute des choses à
           améliorer : vos remarques nous aideront à le faire.</p>
-        <p class="wa-offre"><b>Offre de lancement :</b> si vous prenez l'abonnement annuel,
-          il devient un abonnement <b>à vie</b>.</p>
+        <p class="wa-offre"><b>Offre de lancement :</b> Juboo <b>à vie pour 10 000 F</b>, moins
+          cher qu'une année (12 000 F). Réservé aux dix premiers clients.</p>
         <p>Sur WhatsApp, nous vous envoyons l'application et votre code d'activation.</p>
         <div class="wa-boutons">
           <button type="button" class="wa-annuler">Annuler</button>
