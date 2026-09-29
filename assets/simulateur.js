@@ -516,13 +516,15 @@
       const q = (etat.q || '').trim().toLowerCase();
       const clients = C.clients.filter(c => !q || c.name.toLowerCase().includes(q) || c.phone.includes(q.replace(/\s/g, '')));
       if (!clients.length) {
-        liste.replaceChildren(q
+        // La marge de 16 de l'onglet « Mes Clients » s'ajoute à celle de l'état vide : sans
+        // elle, la phrase se coupait ailleurs que dans l'application.
+        liste.replaceChildren(h('div', { style: 'padding:0 16px' }, q
           ? etatVide({ icone: 'recherche', titre: 'Aucun résultat', message: 'Aucun client ne correspond à « ' + etat.q + ' ».' })
           : etatVide({
             icone: 'personne', titre: 'Votre carnet est vide',
             message: 'Ajoutez votre premier client pour commencer à noter ce qu\'on vous doit.',
             action: 'Ajouter un client', surAction: nouvelleEntree
-          }));
+          })));
         return;
       }
       liste.replaceChildren(h('div', { class: 'liste' }, clients.map(c => {
@@ -670,14 +672,14 @@
       bandeau(),
       h('div', { class: 'barre-detail' },
         h('button', { class: 'bouton-icone', 'aria-label': 'Retour', onclick: retour }, ic('retour')),
-        h('h1', { style: 'font-weight:400' }, 'Profil Client'),
+        h('h1', { style: 'font-weight:700' }, 'Profil Client'),
         h('button', { class: 'bouton-icone', 'aria-label': 'Partager la fiche du client', onclick: () => horsLecon('partageClient') }, ic('partage')),
         h('button', { class: 'bouton-icone', 'aria-label': 'Relevé du mois', onclick: () => horsLecon('releveClient') }, ic('calendrier')),
         h('button', { class: 'bouton-icone', 'aria-label': 'Supprimer le client', style: 'color:#B3261E', onclick: () => supprimerClient(c) }, ic('corbeille'))),
       h('div', { class: 'defile', style: 'padding:16px 16px calc(var(--bas) + 16px)' },
         h('div', { class: 'pile g16' },
           h('div', { style: 'text-align:center' },
-            h('div', { style: 'font-size:28px;line-height:36px;font-weight:900' }, c.name),
+            h('div', { style: 'font-size:24px;line-height:30px;font-weight:900' }, c.name),
             c.knownAs ? h('div', { style: 'font-size:16px;color:#888' }, c.knownAs) : null,
             h('div', { style: 'font-size:16px;line-height:24px;color:#888' }, c.phone ? telAffiche(c.phone) : 'Pas de numéro — relance impossible'),
             h('div', { style: 'margin-top:12px' }, h('button', { class: 'badge', onclick: fiabilite }, 'Pas encore d\'historique')),
@@ -1118,7 +1120,7 @@
               h('div', { style: 'font-size:12px;line-height:16px;font-weight:500;color:rgba(26,27,75,.7)' },
                 (plusieurs ? 'Prochain versement le ' : 'À rendre le ') + dateCourte(prochaine))),
             h('div', { style: 'display:flex;align-items:center' },
-              h('span', { style: 'font-size:22px;line-height:28px;font-weight:900;color:' + (cote ? 'var(--vert)' : 'var(--rouge)') }, francs(total)),
+              h('span', { style: 'font-size:18px;line-height:24px;font-weight:900;color:' + (cote ? 'var(--vert)' : 'var(--rouge)') }, francs(total)),
               ic('deplier', 24, 'color:rgba(26,27,75,.3)')));
         })));
     }
@@ -1207,7 +1209,7 @@
       bandeau(),
       h('div', { class: 'barre-detail' },
         h('button', { class: 'bouton-icone', 'aria-label': 'Retour', onclick: retour }, ic('retour')),
-        h('h1', { style: 'font-weight:400' }, 'Suivi des prêts')),
+        h('h1', { style: 'font-weight:700' }, 'Suivi des prêts')),
       etat.bandeHote,
       h('div', { class: 'defile', style: 'padding:16px 16px calc(var(--bas) + 16px)' },
         etat.ficheHote,
