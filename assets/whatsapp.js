@@ -38,7 +38,7 @@
           améliorer : vos remarques nous aideront à le faire.</p>
         <p class="wa-offre"><b>Offre de lancement :</b> Juboo <b>à vie pour 10 000 F</b>, moins
           cher qu'une année (12 000 F). Réservé aux dix premiers clients.</p>
-        <p>Sur WhatsApp, nous vous envoyons l'application et votre code d'activation.</p>
+        <p>Sur WhatsApp, nous vous envoyons l'application. Elle commence par <b>30 jours d'essai gratuit</b>, avec toutes les fonctions : vous ne payez que si elle vous est utile.</p>
         <div class="wa-boutons">
           <button type="button" class="wa-annuler">Annuler</button>
           <a class="wa-ok" href="${lien}" target="_blank" rel="noopener">Continuer sur WhatsApp</a>
