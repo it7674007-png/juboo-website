@@ -320,7 +320,9 @@ button.badge{border:0;font-family:inherit;cursor:pointer}
 .bande-hote{flex:none;padding:0 12px 8px}
 .bande-hote:empty{display:none}
 .ecran-bande{padding:0 8px 4px}
-.fiche-hote{margin-bottom:16px}
+.fiche-hote{flex:none;padding:0 16px 12px}
+.fiche-hote:empty{display:none}
+.ecran .fiche-hote{padding:0 16px 4px}
 .bande{display:flex;align-items:center;gap:8px;background:var(--creme);border-radius:16px;padding:8px 12px;
   box-shadow:0 4px 10px rgba(26,27,75,.18);color:var(--encre);font-size:12px;line-height:16px;border:0;width:100%;text-align:left}
 .bande img{width:40px;height:40px;border-radius:50%;flex:none;background:#fff}

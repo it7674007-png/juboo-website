@@ -333,15 +333,15 @@
 
   /**
    * Une fenêtre. Formulaire, elle accueille le guide comme dans l'application : le personnage calé
-   * en haut, qui reste visible quand on fait défiler, et la fiche de la situation tout en haut du
-   * contenu — on monte la relire, on redescend remplir.
+   * en haut, et la fiche de la situation juste dessous : ni l'un ni l'autre ne défile, on relit
+   * la fiche sans remonter. Elle se replie d'un appui quand elle gêne.
    */
   function fenetre({ titre, noir, corps, pied, formulaire, surAnnuler, hauteurMax, classe }) {
     const bandeHote = formulaire ? h('div', { class: 'bande-hote' }) : null;
     const ficheHote = formulaire ? h('div', { class: 'fiche-hote' }) : null;
-    const corpsEl = h('div', { class: 'corps', style: hauteurMax ? 'max-height:' + hauteurMax + 'px' : null }, ficheHote, corps);
+    const corpsEl = h('div', { class: 'corps', style: hauteurMax ? 'max-height:' + hauteurMax + 'px' : null }, corps);
     const dlg = h('div', { class: 'dlg ' + (classe || ''), role: 'dialog', 'aria-modal': 'true', 'aria-label': titre || '' },
-      titre ? h('h2', { class: noir ? 'noir' : '' }, titre) : null, bandeHote, corpsEl,
+      titre ? h('h2', { class: noir ? 'noir' : '' }, titre) : null, bandeHote, ficheHote, corpsEl,
       pied ? h('div', { class: 'pied' }, pied) : null);
     const voile = h('div', { class: 'voile' }, dlg);
     const f = { voile, dlg, bandeHote, ficheHote, formulaire, corpsEl };
@@ -1210,9 +1210,8 @@
       h('div', { class: 'barre-detail' },
         h('button', { class: 'bouton-icone', 'aria-label': 'Retour', onclick: retour }, ic('retour')),
         h('h1', { style: 'font-weight:700' }, 'Suivi des prêts')),
-      etat.bandeHote,
+      etat.bandeHote, etat.ficheHote,
       h('div', { class: 'defile', style: 'padding:16px 16px calc(var(--bas) + 16px)' },
-        etat.ficheHote,
         h('div', { class: 'pile g16' },
           h('div', { style: 'margin:-8px -16px' }, cote),
           h('div', { class: 'carte', style: 'border-radius:24px;padding:24px;display:flex;flex-direction:column;gap:16px' },
