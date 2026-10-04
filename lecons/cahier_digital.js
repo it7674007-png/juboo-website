@@ -4,7 +4,7 @@
 // une fois qu'on a agi. Noter 2 000 F au lieu de 3 400 F donne un solde juste et une vente perdue :
 // c'est l'erreur que la scène laisse commettre, pour la faire comprendre.
 (() => {
-  const { V, isAmount, memeJour } = JubooSim;
+  const { V, isAmount, memeJour, JE_L_EFFACE, effaceCreance } = JubooSim;
   const MOUSSA = { name: 'Moussa Diop', phone: '771234567', tag: 'Voisin',
     transactions: [{ amount: 3400, received: 1400, label: 'Huile, eau, brioches, jus' }] };
   // Les montants qui appartiennent au premier client : l'étape d'Awa les ignore.
@@ -91,18 +91,28 @@
             'Bien, le prix de la vente est noté.',
             'Il manque les 1 400 F qu\'il vous a donnés.',
             'Ouvrez sa fiche et appuyez sur « Encaisser ».');
-          if (full) return V('ALMOST', 'corrige',
+          if (full) return effaceCreance(V('ALMOST', 'corrige',
             'Il vous a donné 1 400 F, pas un autre montant.',
-            'Regardez ce que vous avez noté comme reçu.');
-          if (shortcut) return V('ALMOST', 'corrige',
+            JE_L_EFFACE), s, full,
+            'Voilà, c\'est effacé.',
+            'Recommencez avec « Nouvelle Entrée » : 3 400 F au total.',
+            'Dans « Déjà versé », mettez 1 400 F, ni plus ni moins.');
+          if (shortcut) return effaceCreance(V('ALMOST', 'corrige',
             'Le reste est juste : il vous doit bien 2 000 F.',
             'Mais combien avez-vous vendu ce matin ?',
             'D\'après le Cahier, seulement 2 000 F.',
             'Les 3 400 F de la vente ont disparu de vos comptes.',
-            'Reprenez : 3 400 F au total, et 1 400 F déjà versés.');
-          if (txs.length) return V('WRONG', 'non',
+            JE_L_EFFACE), s, shortcut,
+            'Voilà, c\'est effacé.',
+            'Recommencez avec « Nouvelle Entrée » : 3 400 F au total, et 1 400 F déjà versés.',
+            'Ne notez pas seulement ce qui reste dû : la vente compte aussi.');
+          if (txs.length) return effaceCreance(V('WRONG', 'non',
             'Ce n\'est pas le bon montant.',
-            'L\'huile, l\'eau, les deux brioches et le jus font 3 400 F.');
+            'L\'huile, l\'eau, les deux brioches et le jus font 3 400 F.',
+            JE_L_EFFACE), s, txs[0],
+            'Voilà, c\'est effacé.',
+            'Recommencez avec « Nouvelle Entrée » : 3 400 F au total, et 1 400 F déjà versés.',
+            'Relisez le montant avant d\'enregistrer.');
           if (s.clients.length) return V('PROGRESS', 'attend',
             'Bien, il est dans le Cahier.',
             'Maintenant, notez ce qu\'il a pris.');
@@ -157,11 +167,21 @@
             'Parfait.',
             'Si elle n\'a pas payé demain soir, Juboo vous le rappellera.',
             'Vous n\'aurez pas à y penser.');
-          if (hers) return V('ALMOST', 'corrige',
+          if (hers) return effaceCreance(V('ALMOST', 'corrige',
             'Le montant est bon.',
             'Mais elle a dit DEMAIN, et le Cahier indique une autre date.',
-            'Corrigez la date, sinon le rappel arrivera au mauvais moment.');
-          if (fresh.length) return V('WRONG', 'non', 'Ce n\'est pas le bon montant.', 'Awa a pris pour 5 000 F.');
+            'Le rappel arriverait au mauvais moment.',
+            JE_L_EFFACE), s, hers,
+            'Voilà, c\'est effacé.',
+            'Notez à nouveau la dette d\'Awa : 5 000 F.',
+            'Pour la date, choisissez « Demain » : ne gardez pas celle proposée.');
+          if (fresh.length) return effaceCreance(V('WRONG', 'non',
+            'Ce n\'est pas le bon montant.',
+            'Awa a pris pour 5 000 F.',
+            JE_L_EFFACE), s, fresh[0],
+            'Voilà, c\'est effacé.',
+            'Notez à nouveau la dette d\'Awa : 5 000 F, à payer demain.',
+            'Relisez le montant avant d\'enregistrer.');
           return V('WAITING', 'attend', 'Awa attend.', 'Elle prend 5 000 F, et elle paiera demain.');
         }
       },

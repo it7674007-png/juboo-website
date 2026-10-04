@@ -173,7 +173,7 @@
     idx: 0, cle: '', cleBase: '', incise: null, correction: null, corriges: new Set(),
     ouvert: true, mainPassee: false, ficheOuverte: true, ficheFormOuverte: true,
     autoJoue: -1, dejaDit: new Set(), tape: false, clavier: false, avantFrappe: false,
-    planRepli: '', t: {}
+    planRepli: '', t: {}, rappel: null, effacement: false, planEfface: ''
   };
   const etape = () => (G.phase === 'jeu' && L ? L.etapes[G.etape] : null);
   const cleEtape = () => G.partie + ':' + G.phase + ':' + G.etape + ':' + G.essai;
@@ -1318,8 +1318,11 @@
       const rien = issue === 'WAITING';
       // La solution remplace la CONSIGNE, jamais les réactions.
       if (rien && G.revele) { lignes = e.solution; solution = true; humeur = 'explique'; }
+      // Après un effacement, la consigne cède la place à ce qu'il faut refaire — voir rappel.
+      else if (rien && G.rappel) { lignes = G.rappel; humeur = 'explique'; }
       else if (rien) { lignes = (e.bridge || []).concat(e.brief); humeur = 'explique'; }
       else { lignes = v.lignes; humeur = v.humeur; }
+      return { e, v, lignes, humeur, issue, solution };
     }
     return { e, lignes, humeur, issue, solution };
   }
@@ -1454,6 +1457,17 @@
       }, 25000);
     }
 
+    // --- L'erreur écrite, effacée par le personnage — voir Correction dans l'application ---
+    // Une fois sa dernière phrase affichée (« Je l'efface, regardez »), il laisse le temps de la
+    // lire, puis il efface sous les yeux du visiteur.
+    const aEffacer = G.phase === 'jeu' && c.v?.correction && (c.issue === 'ALMOST' || c.issue === 'WRONG') && !G.incise
+      ? c.v.correction : null;
+    if (aEffacer && !suite && !G.effacement && !formOuvert && !fenetres.length && !G.clavier && G.planEfface !== cle) {
+      G.planEfface = cle;
+      clearTimeout(G.t.efface);
+      G.t.efface = setTimeout(() => effacer(aEffacer), 1500);
+    }
+
     // --- L'étape que le jeu joue lui-même : le paiement Wave ---
     if (e && e.autoPlay && G.phase === 'jeu' && G.etape > G.autoJoue && !suite) {
       G.autoJoue = G.etape;
@@ -1505,8 +1519,42 @@
   // ============================================================================================
   function reinitEtape() {
     effacerMinuteurs();
-    Object.assign(G, { revele: false, incise: null, correction: null, corriges: new Set(), dejaDit: new Set(), mainPassee: false, ficheOuverte: true, ouvert: true });
+    clearTimeout(G.t.efface);
+    UI.tel?.querySelectorAll('.eff-voile').forEach(x => x.remove());
+    Object.assign(G, { revele: false, incise: null, correction: null, corriges: new Set(), dejaDit: new Set(), mainPassee: false, ficheOuverte: true, ouvert: true, rappel: null, effacement: false, planEfface: '' });
     cacherNotif();
+  }
+
+  /**
+   * Le personnage efface lui-même la ligne écrite de travers — EffacementParLeGuide dans
+   * l'application. Il appuie sur la ligne, la fenêtre de Juboo s'ouvre avec ses vrais mots, il
+   * appuie sur le bouton ; chaque appui laisse un cercle qui s'estompe. Puis l'étape repart de son
+   * décor, et il dit ce qu'il faut refaire.
+   */
+  function effacer(c) {
+    if (G.effacement) return;
+    G.effacement = true;
+    const partie = cleEtape();
+    const ligne = h('div', { class: 'eff-ligne' }, h('b', null, c.ligne), h('span', null, c.detail));
+    const bouton = h('span', { class: 'eff-bouton' }, c.bouton);
+    const fenetre = h('div', { class: 'eff-fenetre', hidden: true },
+      h('h3', null, c.question), h('p', null, c.detail),
+      h('div', { class: 'eff-actions' }, h('span', { class: 'eff-annuler' }, 'Annuler'), bouton));
+    const voile = h('div', { class: 'eff-voile' }, h('div', { class: 'eff-pile' }, ligne, fenetre));
+    UI.tel.append(voile);
+    const doigt = el => el.append(h('i', { class: 'eff-doigt' }));
+    const plus = (ms, fn) => G.t.auto.push(setTimeout(() => { if (cleEtape() === partie) fn(); }, ms));
+    plus(600, () => doigt(ligne));
+    plus(1700, () => { fenetre.hidden = false; });
+    plus(2700, () => doigt(bouton));
+    plus(3600, () => ligne.classList.add('partie'));
+    plus(4500, () => {
+      voile.remove();
+      G.essai++;
+      entrerEtape();
+      G.rappel = c.apres;
+      majGuide();
+    });
   }
   function entrerEtape() {
     reinitEtape();
@@ -1553,7 +1601,34 @@
   // ============================================================================================
   window.JubooSim = {
     /** Une réaction du guide : l'issue, son humeur, ses phrases. */
-    V: (issue, humeur, ...lignes) => ({ issue, humeur, lignes }),
+    V: (issue, humeur, ...lignes) => ({
+      issue, humeur, lignes, correction: null,
+      /** Ce verdict porte sur une ligne écrite de travers : le personnage l'effacera. */
+      efface(ligne, detail, question, bouton, ...apres) {
+        return { ...this, correction: { ligne, detail, question, bouton, apres } };
+      }
+    }),
+    JE_L_EFFACE: 'Je l\'efface, regardez.',
+    /** « 1 200 F » : les montants tels que le personnage et ses fiches les écrivent. */
+    F: v => groupe(v) + ' F',
+    /** La créance t, effacée : « Effacer cette ligne ? », puis « Effacer ». */
+    effaceCreance(v, s, t, ...apres) {
+      const nom = s.clients.find(c => c.id === t.clientId)?.name || 'Client';
+      const detail = (t.description || 'Marchandise') + ' · ' + groupe(t.amount) + ' F' +
+        (t.receivedAmount > 0.5 ? ' · reçu ' + groupe(t.receivedAmount) + ' F' : '');
+      return v.efface(nom, detail, 'Effacer cette ligne ?', 'Effacer', ...apres);
+    },
+    /** Le prêt l, effacé. */
+    effacePret(v, l, ...apres) {
+      const detail = (l.isLender ? 'Prêté' : 'Emprunté') + ' · ' + groupe(l.amount) + ' F' +
+        (l.receivedAmount > 0.5 ? ' · rendu ' + groupe(l.receivedAmount) + ' F' : '');
+      return v.efface(l.counterpartyName || 'Prêt', detail, 'Effacer cette ligne ?', 'Effacer', ...apres);
+    },
+    /** La tontine t, dissoute : le nombre de mains ne se modifie pas. */
+    effaceTontine(v, t, mains, ...apres) {
+      return v.efface(t.name, 'Cotisation ' + groupe(t.contributionAmount) + ' F · ' + mains + ' mains',
+        'Dissoudre la tontine ?', 'Dissoudre', ...apres);
+    },
     isAmount, memeJour, finDuJour,
     lancer(lecon) {
       L = lecon;

@@ -4,7 +4,7 @@
 // saisit 60 000 au lieu de 10 000 verra Juboo réclamer six fois trop à chacun, tous les mois — et
 // rien à l'écran ne le détrompe : 60 000 est un montant valide. Le guide, lui, le voit.
 (() => {
-  const { V, isAmount } = JubooSim;
+  const { V, isAmount, JE_L_EFFACE, effaceTontine } = JubooSim;
 
   JubooSim.lancer({
     id: 'tontine_premiere',
@@ -71,26 +71,38 @@
         const t = s.tontines[0];
         const mains = t ? (t.totalShares > 0 ? t.totalShares : t.totalMembers) : 0;
         if (!t) return V('WAITING', 'attend', 'Les cinq commerçantes attendent.', 'Chaque membre cotise 10 000 F, tous les mois.');
-        if (isAmount(t.contributionAmount, 60000)) return V('ALMOST', 'corrige',
+        if (isAmount(t.contributionAmount, 60000)) return effaceTontine(V('ALMOST', 'corrige',
           'Attention : 60 000 F, c\'est la cagnotte qu\'un membre REÇOIT.',
           'Juboo demande ce que chaque membre VERSE : 10 000 F.',
           'Sinon, il réclamera 60 000 F à chaque membre, tous les mois.',
-          'Ouvrez la tontine, puis le menu en haut à droite.',
-          'Choisissez ensuite « Modifier la tontine ».');
-        if (!isAmount(t.contributionAmount, 10000)) return V('WRONG', 'non',
+          JE_L_EFFACE), t, mains,
+          'Voilà, c\'est effacé.',
+          'Créez-la à nouveau : 10 000 F par membre, et six mains.',
+          'Ne mettez pas la cagnotte : mettez ce que chacun verse.');
+        if (!isAmount(t.contributionAmount, 10000)) return effaceTontine(V('WRONG', 'non',
           'Ce n\'est pas le bon montant.',
-          'Chaque membre cotise 10 000 F par mois.');
-        // Le nombre de mains ne se rattrape PAS : la seule issue est de dissoudre et recommencer.
-        if (mains < 6) return V('ALMOST', 'corrige',
+          'Chaque membre cotise 10 000 F par mois.',
+          JE_L_EFFACE), t, mains,
+          'Voilà, c\'est effacé.',
+          'Créez-la à nouveau : 10 000 F par membre, et six mains.',
+          'Relisez le montant avant d\'appuyer sur « Créer ».');
+        // Le nombre de mains ne se rattrape PAS : le personnage dissout, et l'on recommence.
+        if (mains < 6) return effaceTontine(V('ALMOST', 'corrige',
           'Le montant est bon.',
           'Mais vous êtes six en vous comptant. Il manque une main.',
           'Une main de moins, c\'est un tour de moins : une personne ne recevrait rien.',
           'Le nombre de mains ne se modifie plus ensuite : il fixe les tours.',
-          'Ouvrez le menu en haut à droite, choisissez « Dissoudre la tontine », et recommencez.');
-        if (mains > 6) return V('ALMOST', 'corrige',
+          JE_L_EFFACE), t, mains,
+          'Voilà, c\'est effacé.',
+          'Créez-la à nouveau, avec six mains.',
+          'Ne gardez pas le nombre proposé : comptez-vous dans le groupe.');
+        if (mains > 6) return effaceTontine(V('ALMOST', 'corrige',
           'Le montant est bon, mais vous avez trop de mains.',
           'Vous êtes six : il faut six mains, donc six tours.',
-          'Cela ne se modifie plus : ouvrez le menu en haut à droite, puis « Dissoudre ».');
+          JE_L_EFFACE), t, mains,
+          'Voilà, c\'est effacé.',
+          'Créez-la à nouveau, avec six mains.',
+          'Une main par personne, pas plus.');
         return V('DONE', 'bravo',
           'Parfait : 10 000 F par main, six mains et six tours.',
           'La cagnotte sera de 60 000 F, et Juboo la calcule tout seul.');

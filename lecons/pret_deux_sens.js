@@ -3,7 +3,7 @@
 // L'erreur qui INVERSE un solde : un emprunt noté comme un prêt fait croire au contraire exact de
 // la vérité, et c'est invisible, parce qu'un solde inversé se lit comme un solde normal.
 (() => {
-  const { V, isAmount } = JubooSim;
+  const { V, isAmount, JE_L_EFFACE, effacePret } = JubooSim;
 
   JubooSim.lancer({
     id: 'pret_deux_sens',
@@ -60,14 +60,23 @@
         ],
         evaluate: s => {
           const sien = s.loans.find(l => isAmount(l.amount, 20000));
-          if (!sien && s.loans.length) return V('WRONG', 'non', 'Ce n\'est pas le bon montant.', 'Malick vous demande 20 000 F.');
+          if (!sien && s.loans.length) return effacePret(V('WRONG', 'non',
+            'Ce n\'est pas le bon montant.',
+            'Malick vous demande 20 000 F.',
+            JE_L_EFFACE), s.loans[0],
+            'Voilà, c\'est effacé.',
+            'Notez à nouveau le prêt de Malick : 20 000 F.',
+            'Relisez le montant avant d\'appuyer sur « Ajouter ».');
           if (!sien) return V('WAITING', 'attend', 'Malick attend devant vous.', 'Il demande 20 000 F, à rembourser à la fin du mois.');
           // Le piège : noté du côté des emprunts.
-          if (!sien.isLender) return V('WRONG', 'non',
+          if (!sien.isLender) return effacePret(V('WRONG', 'non',
             'Non. Vous venez d\'écrire que vous devez 20 000 F à Malick.',
             'C\'est l\'inverse : c\'est lui qui vous les doit.',
             'Sinon, votre solde serait faux de 40 000 F.',
-            'Effacez cette ligne, et reprenez du côté « On me doit ».');
+            JE_L_EFFACE), sien,
+            'Voilà, c\'est effacé.',
+            'Notez le prêt de Malick du côté « On me doit » : 20 000 F.',
+            'Ne le notez pas dans « Je dois » : c\'est lui qui vous doit.');
           return V('DONE', 'bravo',
             'Voilà. Malick vous doit 20 000 F, avec une date de remboursement.',
             'S\'il n\'a pas remboursé à la fin du mois, Juboo vous le rappellera.');
@@ -100,10 +109,13 @@
         evaluate: s => {
           const emprunt = s.loans.find(l => isAmount(l.amount, 5000));
           if (!emprunt) return V('WAITING', 'attend', 'Serigne vous a prêté 5 000 F.', 'Notez-le du bon côté.');
-          if (emprunt.isLender) return V('WRONG', 'non',
+          if (emprunt.isLender) return effacePret(V('WRONG', 'non',
             'Non. Vous venez d\'écrire que Serigne vous doit 5 000 F.',
             'C\'est lui qui vous a prêté l\'argent. C\'est vous qui devez.',
-            'Effacez, et reprenez sur l\'onglet « Je dois ».');
+            JE_L_EFFACE), emprunt,
+            'Voilà, c\'est effacé.',
+            'Passez sur l\'onglet « Je dois », puis notez Serigne : 5 000 F.',
+            'Ne le notez pas dans « On me doit » : c\'est vous qui devez.');
           return V('DONE', 'fete',
             'Parfait. On vous doit 20 000 F, et vous devez 5 000 F.',
             'Votre solde est de 15 000 F, et il est juste.');

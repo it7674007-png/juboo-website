@@ -268,6 +268,25 @@ button{font:inherit;cursor:pointer;color:inherit}
 button.badge{border:0;font-family:inherit;cursor:pointer}
 
 /* ---- La notification d'un paiement, qui glisse du haut ---- */
+/* Le personnage efface une ligne écrite de travers — EffacementParLeGuide dans l'application */
+.eff-voile{position:absolute;inset:0;background:rgba(26,27,75,.45);display:flex;align-items:center;
+  justify-content:center;z-index:70;animation:apparait .2s ease-out}
+.eff-pile{width:calc(100% - 48px);display:flex;flex-direction:column;gap:16px}
+.eff-ligne{position:relative;background:var(--surface);border-radius:20px;padding:16px;
+  box-shadow:0 4px 14px rgba(0,0,0,.18);display:flex;flex-direction:column;gap:2px;transition:opacity .7s ease}
+.eff-ligne b{font-size:16px}
+.eff-ligne span{color:rgba(26,27,75,.65);font-size:14px}
+.eff-ligne.partie{opacity:0;text-decoration:line-through}
+.eff-fenetre{background:var(--surface);border-radius:28px;padding:24px;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.eff-fenetre h3{margin:0 0 12px;font-size:22px;font-weight:900}
+.eff-fenetre p{margin:0 0 12px;font-size:14px}
+.eff-actions{display:flex;justify-content:flex-end;align-items:center;gap:8px}
+.eff-annuler{color:var(--orange);font-weight:700;padding:10px 16px}
+.eff-bouton{position:relative;background:var(--rouge);color:#fff;font-weight:700;padding:10px 20px;border-radius:20px}
+.eff-doigt{position:absolute;left:50%;top:50%;width:28px;height:28px;margin:-14px 0 0 -14px;border-radius:50%;
+  border:4px solid rgba(249,159,27,.85);background:rgba(26,27,75,.3);pointer-events:none;
+  animation:eff-doigt .9s ease-out forwards}
+@keyframes eff-doigt{from{transform:scale(1);opacity:1}to{transform:scale(3.2);opacity:0}}
 .notif{position:absolute;left:12px;right:12px;top:8px;z-index:55;background:#fff;border-radius:16px;
   box-shadow:0 10px 30px rgba(26,27,75,.28);padding:10px 12px;display:flex;gap:10px;align-items:center;
   animation:glisse .45s ease-out}
