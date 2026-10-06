@@ -11,8 +11,8 @@
     depart: 'prets',
     accueil: [
       'Bonjour ! Je suis le guide de Juboo.',
-      'Juboo, c\'est un carnet de comptes dans votre téléphone : pour la boutique, les tontines et les prêts entre proches.',
-      'Vous avez choisi les prêts entre proches : l\'argent que vous prêtez à la famille et aux amis, et celui qu\'on vous prête.',
+      'Juboo, c\'est un carnet de comptes dans votre téléphone : pour la boutique, les tontines et les prêts et emprunts.',
+      'Vous avez choisi les prêts et emprunts : l\'argent que vous prêtez à la famille et aux amis, et celui qu\'on vous prête.',
       'Ce que vous voyez fonctionne comme l\'application : vous pouvez toucher, écrire, et même vous tromper.'
     ],
     invitation: [

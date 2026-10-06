@@ -12,7 +12,7 @@
     depart: 'tontines',
     accueil: [
       'Bonjour ! Je suis le guide de Juboo.',
-      'Juboo, c\'est un carnet de comptes dans votre téléphone : pour la boutique, les tontines et les prêts entre proches.',
+      'Juboo, c\'est un carnet de comptes dans votre téléphone : pour la boutique, les tontines et les prêts et emprunts.',
       'Vous avez choisi « Mes tontines ».',
       'Ce que vous voyez fonctionne comme l\'application : vous pouvez toucher, écrire, et même vous tromper.'
     ],

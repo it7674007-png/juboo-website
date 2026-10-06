@@ -3,6 +3,6 @@
     "titre": "Noter une dette", "apprend": "la dette, l'acompte et le paiement Wave", "disponible": true },
   { "id": "tontine_premiere", "module": "TONTINES", "espace": "Mes tontines",
     "titre": "Créer une tontine", "apprend": "la cotisation, les mains et la cagnotte", "disponible": true },
-  { "id": "pret_deux_sens", "module": "PRETS", "espace": "Prêts entre proches",
+  { "id": "pret_deux_sens", "module": "PRETS", "espace": "Prêts et emprunts",
     "titre": "Prêter ou emprunter", "apprend": "ce qu'on vous doit, ce que vous devez", "disponible": true }
 ]

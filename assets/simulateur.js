@@ -1126,7 +1126,7 @@
               ic('deplier', 24, 'color:rgba(26,27,75,.3)')));
         })));
     }
-    return h('div', { class: 'ecran' }, barreApp(), enTete('Prêts entre proches', 't28'),
+    return h('div', { class: 'ecran' }, barreApp(), enTete('Prêts et emprunts', 't28'),
       segments(etat.onglet, i => { etat.onglet = i; afficher(); }, 'TABS'), corps,
       h('button', { class: 'fab grand', 'data-cible': 'ADD', 'aria-label': 'Noter un prêt', onclick: () => ouvrirFormulaire(cote) }, ic('ajout', 24)));
   }
